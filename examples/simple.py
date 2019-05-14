@@ -27,7 +27,7 @@ if conn.table_exists(table):
 conn.create_table(table)
 wr = conn.create_batch_writer(table)
 
-print "Ingesting some data ..."
+print("Ingesting some data ...")
 for num in range(1, 100):
     label = '%03d'%num
     mut = Mutation('r_%s'%label)
@@ -37,12 +37,12 @@ for num in range(1, 100):
 wr.close()
 
 
-print "Rows 001 through 003 ..."
+print("Rows 001 through 003 ...")
 for entry in conn.scan(table, scanrange=Range(srow='r_001', erow='r_003'), cols=[]):
-    print entry
+    print(entry)
 
-print "Rows 001 and 011 ..."
+print("Rows 001 and 011 ...")
 for entry in conn.batch_scan(table, scanranges=[Range(srow='r_001', erow='r_001'), Range(srow='r_011', erow='r_011')]):
-    print entry
+    print(entry)
 
 conn.close()

@@ -19,7 +19,7 @@ import unittest
 import pyaccumulo
 from pyaccumulo import *
 from mock import Mock
-from pyaccumulo.proxy.ttypes import IteratorScope, PartialKey, SystemPermission, TablePermission
+from accumulo.ttypes import IteratorScope, PartialKey, SystemPermission, TablePermission
 
 
 class AccumuloTest(unittest.TestCase):

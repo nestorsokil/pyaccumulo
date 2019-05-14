@@ -17,7 +17,7 @@
 import unittest
 from mock import Mock
 from pyaccumulo.iterators import *
-from pyaccumulo.proxy.ttypes import IteratorSetting, IteratorScope
+from accumulo.ttypes import IteratorScope
 
 class BaseIteratorTest(unittest.TestCase):
     def test_iterator(self):

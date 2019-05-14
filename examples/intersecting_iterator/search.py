@@ -14,12 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pyaccumulo import Accumulo, Mutation, Range
+from pyaccumulo import Accumulo, Range
 from pyaccumulo.iterators import *
 
-from pyaccumulo.proxy.ttypes import IteratorSetting, IteratorScope
-from examples.util import hashcode
-import hashlib, re
 import settings
 import sys
 
@@ -27,13 +24,13 @@ conn = Accumulo(host=settings.HOST, port=settings.PORT, user=settings.USER, pass
 
 table = sys.argv[1]
 if not conn.table_exists(table):
-    print "Table '%s' does not exist."%table
+    print("Table '%s' does not exist."%table)
     sys.exit(1)
 
 search_terms = [term.lower() for term in sys.argv[2:] if len(term) > 3]
 
 if len(search_terms) < 2:
-    print "More than one term of length > 3 is required for this example"
+    print("More than one term of length > 3 is required for this example")
     sys.exit(1)
 
 uuids = []
@@ -42,8 +39,8 @@ for e in conn.batch_scan(table, scanranges=[Range(srow="s", erow="t")], iterator
 
 if len(uuids) > 0:
     for doc in conn.batch_scan(table, scanranges=[Range(srow=uuid, erow=uuid) for uuid in uuids]):
-        print doc.val
+        print(doc.val)
 else:
-    print "No results found"
+    print("No results found")
 
 conn.close()

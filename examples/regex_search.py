@@ -14,12 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pyaccumulo import Accumulo, Mutation, Range
+from pyaccumulo import Accumulo, Mutation
 from pyaccumulo.iterators import *
-
-from pyaccumulo.proxy.ttypes import IteratorSetting, IteratorScope
-from examples.util import hashcode
-import hashlib, re
 
 import settings
 conn = Accumulo(host=settings.HOST, port=settings.PORT, user=settings.USER, password=settings.PASSWORD)
@@ -34,7 +30,7 @@ wr = conn.create_batch_writer(table)
 license_file = "LICENSE"
 linenum = 0
 
-with file(license_file) as infile:
+with open(license_file) as infile:
     for line in infile:
         linenum += 1
         
@@ -48,6 +44,6 @@ regex2 = RegExFilter(priority=22, val_regex='.*patent', match_substring=True, na
 regex3 = RegExFilter(priority=23, val_regex='have made', match_substring=True, name="RegExFilter3")
 
 for e in conn.batch_scan(table, cols=[["e"]], iterators=[regex1, regex2, regex3]):
-    print e
+    print(e)
 
 conn.close()

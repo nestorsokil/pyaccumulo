@@ -57,6 +57,6 @@ for num in range(0, 1000):
 wr.close()
 
 for e in conn.scan(table):
-    print e
+    print(e)
     
 conn.close()

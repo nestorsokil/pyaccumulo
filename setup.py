@@ -4,11 +4,10 @@
 
 import os
 import sys
-import fnmatch
 import subprocess
 
 from distutils.core import Command
-from setuptools import setup, find_packages
+from setuptools import setup
 
 import version
 
@@ -26,20 +25,14 @@ class rpm(Command):
         pass
 
     def run(self):
-        if has_subprocess:
-            status = subprocess.call(["python", "setup.py", "bdist_rpm", "--install-script", "rpm-install-script.sh"])
+        status = subprocess.call(["python", "setup.py", "bdist_rpm", "--install-script", "rpm-install-script.sh"])
 
-            if status:
-                raise RuntimeError("RPM build failed")
+        if status:
+            raise RuntimeError("RPM build failed")
 
-            print ""
-            print "RPM built"
-        else:
-            print """
-`setup.py rpm` is not supported for this version of Python.
+        print("")
+        print("RPM built")
 
-Please ask in the user forums for help.
-"""
 
 class doc(Command):
     description = "generate or test documentation"
@@ -66,21 +59,15 @@ class doc(Command):
             except:
                 pass
 
-        if has_subprocess:
             status = subprocess.call(["sphinx-build", "-b", mode, "doc", path])
 
             if status:
                 raise RuntimeError("documentation step '%s' failed" % mode)
 
-            print ""
-            print "Documentation step '%s' performed, results here:" % mode
-            print "   %s/" % path
-        else:
-            print """
-`setup.py doc` is not supported for this version of Python.
+            print("")
+            print("Documentation step '%s' performed, results here:" % mode)
+            print("   %s/" % path)
 
-Please ask in the user forums for help.
-"""
 
 class PyTest(Command):
     '''run py.test'''
@@ -108,32 +95,33 @@ class PyTest(Command):
         # reload sys.path for any new libraries installed
         import site
         site.main()
-        print sys.path
+        print(sys.path)
         # use pytest to run tests
         pytest = __import__('pytest')
         exitcode = pytest.main(['--cov', 'pyaccumulo', '--cov-report', 'term', '-vvs', 'tests'])
         sys.exit(exitcode)
 
+
 VERSION, HASH = version.get_git_version()
 
 setup(
-      name = 'pyaccumulo',
-      version = VERSION,
-      author = 'Jason Trost',
-      author_email = 'jason.trost AT gmail.com',
-      maintainer = 'Jason Trost',
-      maintainer_email = 'jason.trost AT gmail.com',
-      license = 'License :: OSI Approved :: Apache Software License',
-      description = 'Python client library for Apache Accumulo',
-      long_description = long_description,
-      url = 'https://github.com/accumulo/pyaccumulo',
-      keywords = 'accumulo client db distributed thrift',
-      packages = ['pyaccumulo',
-                  'pyaccumulo.iterators',
-                  'pyaccumulo.proxy'
-                  ],
-      install_requires = ['thrift'],
-      tests_require = [
+    name='pyaccumulo',
+    version=VERSION,
+    author='Jason Trost',
+    author_email='jason.trost AT gmail.com',
+    maintainer='Jason Trost',
+    maintainer_email='jason.trost AT gmail.com',
+    license='License :: OSI Approved :: Apache Software License',
+    description='Python client library for Apache Accumulo',
+    long_description=long_description,
+    url='https://github.com/accumulo/pyaccumulo',
+    keywords='accumulo client db distributed thrift',
+    packages=['pyaccumulo',
+              'pyaccumulo.iterators',
+              'pyaccumulo.proxy'
+              ],
+    install_requires=['thrift'],
+    tests_require=[
         'mock',
         'coverage',
         'ipdb',
@@ -143,23 +131,23 @@ setup(
         'pytest-timeout',
         'pytest-capturelog',
         'pytest-incremental',
-        ],
-      cmdclass=dict(
-        doc = doc, 
-        rpm = rpm,
-        test = PyTest,
-        ),
-      classifiers=[
-          'Development Status :: 3 - Alpha',
-          'Intended Audience :: Developers',
-          'License :: OSI Approved :: Apache Software License',
-          'Natural Language :: English',
-          'Operating System :: OS Independent',
-          'Programming Language :: Python',
-          'Programming Language :: Python :: 2',
-          'Programming Language :: Python :: 2.6',
-          'Programming Language :: Python :: 2.7',
-          'Programming Language :: Python :: 2 :: Only',
-          'Topic :: Software Development :: Libraries :: Python Modules'
-          ],
-      )
+    ],
+    cmdclass=dict(
+        doc=doc,
+        rpm=rpm,
+        test=PyTest,
+    ),
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: Apache Software License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 2 :: Only',
+        'Topic :: Software Development :: Libraries :: Python Modules'
+    ],
+)
