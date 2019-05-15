@@ -1,60 +1,57 @@
-version: '2'
+version: '3'
 services:
   hdfs-name:
-    image: quay.io/geodocker/hdfs:0.1
-    command: name
-    environment:
-      HADOOP_MASTER_ADDRESS: hdfs-name
+    image: cybermaggedon/hadoop:2.9.2
+    command: /start-namenode
     ports:
       - 50070:50070
+      - 50075:50075
+      - 50090:50090
+      - 9000:9000
   hdfs-data:
-    image: quay.io/geodocker/hdfs:0.1
-    command: data
+    image: cybermaggedon/hadoop:2.9.2
+    command: /start-datanode
     environment:
-      HADOOP_MASTER_ADDRESS: hdfs-name
+      NAMENODE_URI: hdfs://hdfs-name:9000
     depends_on:
       - hdfs-name
   zookeeper:
-    image: quay.io/geodocker/zookeeper:latest
+    image: zookeeper:3.4.14
     ports:
       - 2181:2181
-  accumulo-master:
-    image: quay.io/geodocker/accumulo:latest
-    command: master --auto-init
+  accumulo-cluster:
+    image: cybermaggedon/accumulo:1.9.3
     environment:
-      HADOOP_MASTER_ADDRESS: hdfs-name
       ZOOKEEPERS: zookeeper
-      ACCUMULO_PASSWORD: GisPwd
-  accumulo-monitor:
-    image: quay.io/geodocker/accumulo:latest
-    command: monitor
-    environment:
-      HADOOP_MASTER_ADDRESS: hdfs-name
-      ZOOKEEPERS: zookeeper
+      HDFS_VOLUMES: hdfs://hdfs-name:9000/accumulo
+      NAMENODE_URI: hdfs://hdfs-name:9000/
     ports:
       - 50095:50095
+      - 42424:42424
+      - 9995:9995
     depends_on:
       - zookeeper
-      - accumulo-master
-  accumulo-tserver:
-    image: quay.io/geodocker/accumulo:latest
-    command: tserver
-    environment:
-      HADOOP_MASTER_ADDRESS: hdfs-name
-      ZOOKEEPERS: zookeeper
-    depends_on:
-      - zookeeper
-      - accumulo-master
+      - hdfs-name
+      - hdfs-data
   accumulo-proxy:
-    image: quay.io/geodocker/accumulo:latest
-    command: bash -c "sleep 45s && echo 'useMockInstance=false' > /opt/accumulo/proxy/proxy.properties && echo 'useMiniAccumulo=false' >> /opt/accumulo/proxy/proxy.properties && echo 'tokenClass=org.apache.accumulo.core.client.security.tokens.PasswordToken' >> /opt/accumulo/proxy/proxy.properties && echo 'port=33333' >> /opt/accumulo/proxy/proxy.properties && echo 'maxFrameSize=16M' >> /opt/accumulo/proxy/proxy.properties && echo 'instance=accumulo' >> /opt/accumulo/proxy/proxy.properties && echo 'zookeepers=zookeeper:2181' >> /opt/accumulo/proxy/proxy.properties && /opt/accumulo/bin/accumulo proxy -p /opt/accumulo/proxy/proxy.properties"
+    image: cybermaggedon/accumulo:1.9.3
+    command: >
+      bash -c "sleep 45s
+      && echo 'useMockInstance=false' > /usr/local/accumulo/proxy/proxy.properties
+      && echo 'useMiniAccumulo=false' >> /usr/local/accumulo/proxy/proxy.properties
+      && echo 'tokenClass=org.apache.accumulo.core.client.security.tokens.PasswordToken' >> /usr/local/accumulo/proxy/proxy.properties
+      && echo 'port=45000' >> /usr/local/accumulo/proxy/proxy.properties
+      && echo 'maxFrameSize=16M' >> /usr/local/accumulo/proxy/proxy.properties
+      && echo 'instance=accumulo' >> /usr/local/accumulo/proxy/proxy.properties
+      && echo 'zookeepers=zookeeper:2181' >> /usr/local/accumulo/proxy/proxy.properties
+      && /usr/local/accumulo/bin/accumulo proxy -p /usr/local/accumulo/proxy/proxy.properties"
     environment:
-      HADOOP_MASTER_ADDRESS: hdfs-name
+      HADOOP_MASTER_ADDRESS: hdfs-name:9000
       ZOOKEEPERS: zookeeper
     ports:
-      - 33333:33333
+      - 45000:45000
     depends_on:
       - zookeeper
-      - accumulo-master
+      - accumulo-cluster
       - hdfs-name
       - hdfs-data
