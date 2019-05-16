@@ -3,4 +3,4 @@ from pyaccumulo.connection_pool import *
 import pyaccumulo.iterators as iterators
 import pyaccumulo.objects as objects
 
-__all__ = ["Accumulo", "AccumuloPool", "objects", "iterators"]
+__all__ = ["Accumulo", "AccumuloPool", "AccumuloAsyncPool", "objects", "iterators"]
