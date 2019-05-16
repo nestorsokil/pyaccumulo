@@ -353,14 +353,14 @@ class RangeTest(unittest.TestCase):
         self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2", timestamp=101, colVisibility="zx"), rng.stop)
 
     def test_followingPrefix(self):
-        self.assertIsNone(Range.followingPrefix(''))
+        self.assertIsNone(Range.following_prefix(''))
 
-        self.assertIsNone(Range.followingPrefix('\xff'))
+        self.assertIsNone(Range.following_prefix('\xff'))
 
-        self.assertEquals('\xff',  Range.followingPrefix('\xfe'))
+        self.assertEquals('\xff', Range.following_prefix('\xfe'))
 
         self.assertEquals('\x44\xff\xfe\x08',
-            Range.followingPrefix('\x44\xff\xfe\x07\xff\xff'))
+                          Range.following_prefix('\x44\xff\xfe\x07\xff\xff'))
 
     def test_prefix(self):
         r = Range.prefix('')

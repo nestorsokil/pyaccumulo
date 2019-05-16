@@ -20,7 +20,7 @@ from thrift.protocol import TCompactProtocol
 
 from accumulo import AccumuloProxy
 from accumulo.ttypes import ScanColumn, ColumnUpdate, ScanOptions, Key, BatchScanOptions, TimeType, WriterOptions, \
-    IteratorSetting, Range
+    IteratorSetting, Range as AccumuloRange
 
 from collections import namedtuple
 from pyaccumulo.iterators import BaseIterator
@@ -31,22 +31,16 @@ Cell = namedtuple("Cell", "row cf cq cv ts val")
 
 
 def _get_scan_columns(cols):
-    columns = None
-    if cols:
-        columns = []
-        for col in cols:
-            sc = ScanColumn()
-            sc.colFamily = col[0]
-            sc.colQualifier = col[1] if len(col) > 1 else None
-            columns.append(sc)
-    return columns
+    return [
+        ScanColumn(colFamily=col.get('cf'), colQualifier=col.get('cq'))
+        for col in cols
+    ]
 
 
 def following_array(val):
     if val:
-        return val + "\0"
-    else:
-        return None
+        return val + b'\0'
+    return None
 
 
 def following_key(key):
@@ -102,27 +96,27 @@ class Range(object):
         self.einclude = einclude
 
     @staticmethod
-    def followingPrefix(prefix):
+    def following_prefix(prefix):
         """Returns a String that sorts just after all Strings beginning with a prefix"""
-        prefixBytes = array('B', prefix)
+        prefix_bytes = array('B', prefix)
 
-        changeIndex = len(prefixBytes) - 1
-        while (changeIndex >= 0 and prefixBytes[changeIndex] == 0xff):
-            changeIndex = changeIndex - 1;
-        if (changeIndex < 0):
+        change_index = len(prefix_bytes) - 1
+        while change_index >= 0 and prefix_bytes[change_index] == 0xff:
+            change_index = change_index - 1
+        if (change_index < 0):
             return None
-        newBytes = array('B', prefix[0:changeIndex + 1])
-        newBytes[changeIndex] = newBytes[changeIndex] + 1
-        return newBytes.tostring()
+        new_bytes = array('B', prefix[0:change_index + 1])
+        new_bytes[change_index] = new_bytes[change_index] + 1
+        return new_bytes.tostring()
 
     @staticmethod
-    def prefix(rowPrefix):
+    def prefix(row_prefix):
         """Returns a Range that covers all rows beginning with a prefix"""
-        fp = Range.followingPrefix(rowPrefix)
-        return Range(srow=rowPrefix, sinclude=True, erow=fp, einclude=False)
+        fp = Range.following_prefix(row_prefix)
+        return Range(srow=row_prefix, sinclude=True, erow=fp, einclude=False)
 
-    def to_range(self):
-        r = Range()
+    def to_range(self) -> AccumuloRange:
+        r = AccumuloRange()
         r.startInclusive = self.sinclude
         r.stopInclusive = self.einclude
 

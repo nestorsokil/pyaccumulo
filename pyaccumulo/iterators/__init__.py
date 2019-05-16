@@ -37,19 +37,21 @@ class BaseIterator(object):
     def _get_iterator_properties(self):
         return {}
 
-    def attach(self, conn, table, scopes=set([IteratorScope.SCAN, IteratorScope.MINC, IteratorScope.MAJC])):
+    def attach(self, conn, table, scopes=None):
+        if scopes is None:
+            scopes = {IteratorScope.SCAN, IteratorScope.MINC, IteratorScope.MAJC}
         conn.client.attachIterator(conn.login, table, self.get_iterator_setting(), scopes)
 
 
 class BaseCombiner(BaseIterator):
     """docstring for BaseCombiner"""
 
-    def __init__(self, name, priority, classname, columns=[], combine_all_columns=True, encoding_type="STRING"):
+    def __init__(self, name, priority, classname, columns=None, combine_all_columns=True, encoding_type="STRING"):
         super(BaseCombiner, self).__init__(name, priority, classname)
         self.columns = columns
         self.encoding_type = encoding_type
 
-        if len(columns) == 0:
+        if not columns:
             self.combine_all_columns = combine_all_columns
         else:
             self.combine_all_columns = False
@@ -75,7 +77,7 @@ class BaseCombiner(BaseIterator):
 class SummingCombiner(BaseCombiner):
     """docstring for SummingCombiner"""
 
-    def __init__(self, name="SummingCombiner", priority=10, columns=[], combine_all_columns=True,
+    def __init__(self, name="SummingCombiner", priority=10, columns=None, combine_all_columns=True,
                  encoding_type="STRING"):
         super(SummingCombiner, self).__init__(name=name, priority=priority,
                                               classname="org.apache.accumulo.core.iterators.user.SummingCombiner",
@@ -86,7 +88,7 @@ class SummingCombiner(BaseCombiner):
 class SummingArrayCombiner(BaseCombiner):
     """docstring for SummingArrayCombiner"""
 
-    def __init__(self, name="SummingArrayCombiner", priority=10, columns=[], combine_all_columns=True,
+    def __init__(self, name="SummingArrayCombiner", priority=10, columns=None, combine_all_columns=True,
                  encoding_type="STRING"):
         super(SummingArrayCombiner, self).__init__(name=name, priority=priority,
                                                    classname="org.apache.accumulo.core.iterators.user.SummingArrayCombiner",
@@ -97,7 +99,7 @@ class SummingArrayCombiner(BaseCombiner):
 class MaxCombiner(BaseCombiner):
     """docstring for MaxCombiner"""
 
-    def __init__(self, name="MaxCombiner", priority=10, columns=[], combine_all_columns=True, encoding_type="STRING"):
+    def __init__(self, name="MaxCombiner", priority=10, columns=None, combine_all_columns=True, encoding_type="STRING"):
         super(MaxCombiner, self).__init__(name=name, priority=priority,
                                           classname="org.apache.accumulo.core.iterators.user.MaxCombiner",
                                           columns=columns, combine_all_columns=combine_all_columns,
@@ -107,7 +109,7 @@ class MaxCombiner(BaseCombiner):
 class MinCombiner(BaseCombiner):
     """docstring for MinCombiner"""
 
-    def __init__(self, name="MinCombiner", priority=10, columns=[], combine_all_columns=True, encoding_type="STRING"):
+    def __init__(self, name="MinCombiner", priority=10, columns=None, combine_all_columns=True, encoding_type="STRING"):
         super(MinCombiner, self).__init__(name=name, priority=priority,
                                           classname="org.apache.accumulo.core.iterators.user.MinCombiner",
                                           columns=columns, combine_all_columns=combine_all_columns,
@@ -173,10 +175,14 @@ class RegExFilter(BaseIterator):
     def _get_iterator_properties(self):
         props = {}
 
-        if self.row_regex: props["rowRegex"] = self.row_regex
-        if self.cf_regex: props["colfRegex"] = self.cf_regex
-        if self.cq_regex: props["colqRegex"] = self.cq_regex
-        if self.val_regex: props["valueRegex"] = self.val_regex
+        if self.row_regex:
+            props["rowRegex"] = self.row_regex
+        if self.cf_regex:
+            props["colfRegex"] = self.cf_regex
+        if self.cq_regex:
+            props["colqRegex"] = self.cq_regex
+        if self.val_regex:
+            props["valueRegex"] = self.val_regex
 
         props["orFields"] = str(self.or_fields).lower()
         props["matchSubstring"] = str(self.match_substring).lower()
@@ -188,8 +194,11 @@ class IntersectingIterator(BaseIterator):
     """docstring for IntersectingIterator"""
 
     def __init__(self, terms, not_flags=None, priority=10, name="IntersectingIterator"):
-        super(IntersectingIterator, self).__init__(name=name, priority=priority,
-                                                   classname="org.apache.accumulo.core.iterators.user.IntersectingIterator")
+        super(IntersectingIterator, self).__init__(
+            name=name,
+            priority=priority,
+            classname="org.apache.accumulo.core.iterators.user.IntersectingIterator"
+        )
         self.terms = terms
         self.not_flags = not_flags
 
