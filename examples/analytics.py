@@ -14,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pyaccumulo import Accumulo, Mutation, Range
+from pyaccumulo import Accumulo
+from pyaccumulo.objects import Mutation
 from pyaccumulo.iterators import *
 import settings
 
